@@ -160,7 +160,7 @@ class ReinforcementAgent(ValueEstimationAgent):
     def isInTesting(self):
         return not self.isInTraining()
 
-    def __init__(self, actionFn = None, numTraining=100, epsilon=0.5, alpha=0.5, gamma=1):
+    def __init__(self, actionFn = None, numTraining=100, epsilon=0.5, alpha=0.5, gamma=1, pIters=1):
         """
         actionFn: Function which takes a state and returns the list of legal actions
 
@@ -168,6 +168,7 @@ class ReinforcementAgent(ValueEstimationAgent):
         epsilon  - exploration rate
         gamma    - discount factor
         numTraining - number of training episodes, i.e. no learning after these many episodes
+        pIters      - number of planning iterations
         """
         if actionFn == None:
             actionFn = lambda state: state.getLegalActions()
@@ -179,6 +180,7 @@ class ReinforcementAgent(ValueEstimationAgent):
         self.epsilon = float(epsilon)
         self.alpha = float(alpha)
         self.discount = float(gamma)
+        self.pIters = int(pIters)
 
     ################################
     # Controls needed for Crawler  #

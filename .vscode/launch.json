@@ -11,8 +11,8 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["-p", "ApproximateQAgent", "-a", "extractor=SimpleExtractor", "-x", "50", "-n", "60", "-l", "mediumGrid"]
-            // python pacman.py -p ApproximateQAgent -a extractor=SimpleExtractor -x 50 -n 60 -l mediumGrid
+            "args": ["-a", "dq", "-k", "10", "-n", "0", "-e", "0.3", "-l", "0.7", "-g", "MazeGrid"]
+            // -a dq -k 10 -n 0 -e .3 -l 0.7 -r -0.01 -g MazeGrid
         }
     ]
 }
