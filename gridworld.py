@@ -23,11 +23,14 @@ class Gridworld(mdp.MarkovDecisionProcess):
     """
       Gridworld
     """
-    def __init__(self, grid):
+    def __init__(self, grid, grids=[]):
         # layout
         if type(grid) == type([]): grid = makeGrid(grid)
         self.grid = grid
-
+        # grids adds the capability for an env to switch grids midway through (ShortcutGrid)
+        if len(grids) > 1:
+            self.grid = grids[0]
+            self.grids = grids
         # parameters
         self.livingReward = 0.0
         self.noise = 0.2
@@ -175,6 +178,16 @@ class Gridworld(mdp.MarkovDecisionProcess):
         if y < 0 or y >= self.grid.height: return False
         if x < 0 or x >= self.grid.width: return False
         return self.grid[x][y] != '#'
+    
+    def updateGrid(self):
+        """
+        Updates the current grid to the next grid in self.grids. 
+        If it is on the last grid then return to the first grid in the list.
+        """
+        i = self.grids.index(self.grid) + 1
+        if i >= len(self.grids): self.grid = self.grids[0]
+        else: self.grid = self.grids[i]
+        return
 
 class GridworldEnvironment(environment.Environment):
 
@@ -311,6 +324,21 @@ def getMazeGrid():
             ['S',' ',' ',' ']]
     return Gridworld(grid)
 
+def getShortcutGrid():
+    # Environment will change from the first grid to the next grid
+    # (default at episode 100 the environment will update)
+    grid1 = [[' ',' ',' ',' ',' ',' ',+1],
+            [' ',' ',' ',' ',' ',' ',' '],
+            [' ','#','#','#','#','#','#'],
+            [' ',' ',' ',' ',' ',' ',' '],
+            [' ',' ','S',' ',' ',' ',' ']]
+    grid2 = [[' ',' ',' ',' ',' ',' ',+1],
+            [' ',' ',' ',' ',' ',' ',' '],
+            [' ','#','#','#','#','#',' '],
+            [' ',' ',' ',' ',' ',' ',' '],
+            [' ',' ','S',' ',' ',' ',' ']]
+    grids = [makeGrid(grid1),makeGrid(grid2)]
+    return Gridworld(grid=grids[0],grids=grids)
 
 
 def getUserAction(state, actionFunction):
@@ -403,7 +431,7 @@ def parseOptions():
                          metavar="K", help='Number of epsiodes of the MDP to run (default %default)')
     optParser.add_option('-g', '--grid',action='store',
                          metavar="G", type='string',dest='grid',default="BookGrid",
-                         help='Grid to use (case sensitive; options are BookGrid, BridgeGrid, CliffGrid, MazeGrid, default %default)' )
+                         help='Grid to use (case sensitive; options are BookGrid, BridgeGrid, CliffGrid, MazeGrid, ShortcutGrid default %default)' )
     optParser.add_option('-w', '--windowSize', metavar="X", type='int',dest='gridSize',default=150,
                          help='Request a window width of X pixels *per grid cell* (default %default)')
     optParser.add_option('-a', '--agent',action='store', metavar="A",
@@ -424,6 +452,9 @@ def parseOptions():
     optParser.add_option('-m', '--manual',action='store_true',
                          dest='manual',default=False,
                          help='Manually control agent')
+    optParser.add_option('-u', '--gridUpdate',action='store',
+                         type='int',dest='gridUpdate',default=100,
+                         help='Episode when the grid will be updated to the next (default %default)')
     optParser.add_option('-v', '--valueSteps',action='store_true' ,default=False,
                          help='Display each step of value iteration')
     optParser.add_option('-x', '--planningIterations',action='store',
@@ -596,6 +627,10 @@ if __name__ == '__main__':
         print()
     returns = 0
     for episode in range(1, opts.episodes+1):
+        # update gridworld at specified episode
+        if len(env.gridWorld.grids) > 1:
+            if episode == opts.gridUpdate:
+                env.gridWorld.updateGrid()
         returns += runEpisode(a, env, opts.discount, decisionCallback, displayCallback, messageCallback, pauseCallback, episode)
     if opts.episodes > 0:
         print()
