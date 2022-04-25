@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["-a", "dq", "-k", "10", "-n", "0", "-e", "0.3", "-l", "0.7", "-g", "MazeGrid"]
+            "args": ["-a", "dqp", "-k", "10", "-n", "0", "-e", "0.3", "-l", "0.3", "-g", "MazeGrid", "-x", "5", "-y", "0.001"]
             // -a dq -k 10 -n 0 -e .3 -l 0.7 -r -0.01 -g MazeGrid
         }
     ]

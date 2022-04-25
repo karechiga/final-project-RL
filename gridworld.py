@@ -427,12 +427,15 @@ def parseOptions():
     optParser.add_option('-v', '--valueSteps',action='store_true' ,default=False,
                          help='Display each step of value iteration')
     optParser.add_option('-x', '--planningIterations',action='store',
-                         type='int',dest='planningIters',default=1,
+                         type='int',dest='planningIters',default=3,
                          help='Number of planning iterations (default %default)')
+    optParser.add_option('-y', '--kappa',action='store',
+                         type='float',dest='kappa',default=0.1,
+                         help='Rate of rewarding time since a state-action was last visited for Dyna-Q+ (default %default)')
 
     opts, args = optParser.parse_args()
 
-    if opts.manual and opts.agent != 'q' and opts.agent != 'qp' and opts.agent != 'dq':
+    if opts.manual and opts.agent != 'q' and opts.agent != 'dqp' and opts.agent != 'dq':
         print('## Disabling Agents in Manual Mode (-m) ##')
         opts.agent = None
 
@@ -496,19 +499,7 @@ if __name__ == '__main__':
                       'epsilon': opts.epsilon,
                       'actionFn': actionFn}
         a = qlearningAgents.QLearningAgent(**qLearnOpts)
-    elif opts.agent == 'qp':    # Random-sample one-step tabular Q-planning
-        #env.getPossibleActions, opts.discount, opts.learningRate, opts.epsilon
-        #simulationFn = lambda agent, state: simulation.GridworldSimulation(agent,state,mdp)
-        gridWorldEnv = GridworldEnvironment(mdp)
-        actionFn = lambda state: mdp.getPossibleActions(state)
-        qLearnOpts = {'gamma': opts.discount,
-                      'alpha': opts.learningRate,
-                      'epsilon': opts.epsilon,
-                      'actionFn': actionFn}
-        a = qlearningAgents.QPlanningAgent(**qLearnOpts)
     elif opts.agent == 'dq':    # dyna-Q agent
-        #env.getPossibleActions, opts.discount, opts.learningRate, opts.epsilon
-        #simulationFn = lambda agent, state: simulation.GridworldSimulation(agent,state,mdp)
         gridWorldEnv = GridworldEnvironment(mdp)
         actionFn = lambda state: mdp.getPossibleActions(state)
         qLearnOpts = {'gamma': opts.discount,
@@ -517,6 +508,16 @@ if __name__ == '__main__':
                       'actionFn': actionFn,
                       'pIters': opts.planningIters}
         a = qlearningAgents.DynaQ(**qLearnOpts)
+    elif opts.agent == 'dqp':    # Dyna-Q+
+        gridWorldEnv = GridworldEnvironment(mdp)
+        actionFn = lambda state: mdp.getPossibleActions(state)
+        qLearnOpts = {'gamma': opts.discount,
+                      'alpha': opts.learningRate,
+                      'epsilon': opts.epsilon,
+                      'actionFn': actionFn,
+                      'pIters': opts.planningIters,
+                      'kappa': opts.kappa}
+        a = qlearningAgents.DynaQPlus(**qLearnOpts)
     elif opts.agent == 'random':
         # # No reason to use the random agent without episodes
         if opts.episodes == 0:
@@ -571,7 +572,7 @@ if __name__ == '__main__':
         else:
             if opts.agent in ('random', 'value', 'asynchvalue', 'priosweepvalue'):
                 displayCallback = lambda state: display.displayValues(a, state, "CURRENT VALUES")
-            if (opts.agent == 'q' or opts.agent == 'qp' or opts.agent == 'dq'): displayCallback = lambda state: display.displayQValues(a, state, "CURRENT Q-VALUES")
+            if (opts.agent == 'q' or opts.agent == 'dqp' or opts.agent == 'dq'): displayCallback = lambda state: display.displayQValues(a, state, "CURRENT Q-VALUES")
 
     messageCallback = lambda x: printString(x)
     if opts.quiet:
@@ -603,7 +604,7 @@ if __name__ == '__main__':
         print()
 
     # DISPLAY POST-LEARNING VALUES / Q-VALUES
-    if (opts.agent == 'q' or opts.agent == 'qp' or opts.agent == 'dq') and not opts.manual:
+    if (opts.agent == 'q' or opts.agent == 'dqp' or opts.agent == 'dq') and not opts.manual:
         try:
             display.displayQValues(a, message = "Q-VALUES AFTER "+str(opts.episodes)+" EPISODES")
             display.pause()
