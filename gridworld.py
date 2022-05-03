@@ -30,7 +30,7 @@ class Gridworld(mdp.MarkovDecisionProcess):
         # grids adds the capability for an env to switch grids midway through (ShortcutGrid)
         if len(grids) > 1:
             self.grid = grids[0]
-            self.grids = grids
+        self.grids = grids
         # parameters
         self.livingReward = 0.0
         self.noise = 0.2
@@ -414,20 +414,20 @@ def parseOptions():
                          type='float',dest='livingReward',default=0.0,
                          metavar="R", help='Reward for living for a time step (default %default)')
     optParser.add_option('-n', '--noise',action='store',
-                         type='float',dest='noise',default=0.2,
+                         type='float',dest='noise',default=0.0,
                          metavar="P", help='How often action results in ' +
                          'unintended direction (default %default)' )
     optParser.add_option('-e', '--epsilon',action='store',
                          type='float',dest='epsilon',default=0.3,
                          metavar="E", help='Chance of taking a random action in q-learning (default %default)')
     optParser.add_option('-l', '--learningRate',action='store',
-                         type='float',dest='learningRate',default=0.5,
+                         type='float',dest='learningRate',default=0.3,
                          metavar="P", help='TD learning rate (default %default)' )
     optParser.add_option('-i', '--iterations',action='store',
                          type='int',dest='iters',default=10,
                          metavar="K", help='Number of rounds of value iteration (default %default)')
     optParser.add_option('-k', '--episodes',action='store',
-                         type='int',dest='episodes',default=1,
+                         type='int',dest='episodes',default=10,
                          metavar="K", help='Number of epsiodes of the MDP to run (default %default)')
     optParser.add_option('-g', '--grid',action='store',
                          metavar="G", type='string',dest='grid',default="BookGrid",
@@ -435,8 +435,8 @@ def parseOptions():
     optParser.add_option('-w', '--windowSize', metavar="X", type='int',dest='gridSize',default=150,
                          help='Request a window width of X pixels *per grid cell* (default %default)')
     optParser.add_option('-a', '--agent',action='store', metavar="A",
-                         type='string',dest='agent',default="random",
-                         help='Agent type (options are \'random\', \'value\' and \'q\', default %default)')
+                         type='string',dest='agent',default="q",
+                         help='Agent type (options are \'q\', \'dq\', and \'dqp\', default %default)')
     optParser.add_option('-t', '--text',action='store_true',
                          dest='textDisplay',default=False,
                          help='Use text-only ASCII display')
@@ -461,7 +461,7 @@ def parseOptions():
                          type='int',dest='planningIters',default=3,
                          help='Number of planning iterations (default %default)')
     optParser.add_option('-y', '--kappa',action='store',
-                         type='float',dest='kappa',default=0.1,
+                         type='float',dest='kappa',default=0.01,
                          help='Rate of rewarding time since a state-action was last visited for Dyna-Q+ (default %default)')
 
     opts, args = optParser.parse_args()

@@ -209,14 +209,14 @@ class DynaQPlus(QLearningAgent):
     def updateModel(self, state, nextState, action, reward):
       # Contrary to regular Dyna-Q, in Dyna-Q+ we will consider unvisited actions from visited states.
       if state not in self.model.keys():
-          self.model[state] = {}
-      for a in self.getLegalActions(state):
-          # the initial model for such actions was that they would
-          # lead back to the same state with a reward of 0.
-          if a != action:
-              self.model[state][a] = (0, state)
-          self.qVisited.add((state,a))
-      # append actions to visited q list.
+        self.model[state] = {}
+        for a in self.getLegalActions(state):
+            # the initial model for such actions was that they would
+            # lead back to the same state with a reward of 0.
+            if a != action:
+                self.model[state][a] = (0, state)
+            self.qVisited.add((state,a))
+        # add actions to visited q set.
 
       self.model[state][action] = (reward,nextState)
     
